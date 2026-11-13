@@ -1,44 +1,35 @@
-EXPERIMENT DETAILS
-EXP: Continuous Lab Evaluation-5
-DATE: 10/08/2026
-NAME OF EXP: Hardware Timer and Interrupt-Based Timing for LED Fading, Pulse Generation, and Stepper Motor Control
-HARDWARE SETUP / PLATFORM: AT89S52 8051 development board + Keil C51
-TASK 2 : variable-frequency square-wave generation
+# CAT5 – TASK5B: Variable-Frequency Square-Wave Generation
 
-1. Circuit Diagram
+## Experiment Details
+- **Microcontroller:** AT89S52
+- **Clock:** 11.0592 MHz crystal
+- **Timer:** Timer 0, Mode 1
+- **Waveform output:** P1.0
+- **Mode-selection inputs:** P3.0 and P3.1 (active low)
+- **Source file:** `square_wave.c`
 
-P1.0 is toggled by a Timer 0 ISR; P3.0 and P3.1 select the tick limit.
+## Objective
+Generate a square wave on P1.0 and change its frequency using two digital mode-selection inputs.
 
-* Microcontroller: AT89S52 (8051)
-* GPIO Port: Ports 1 and 3; Timer 0 is also used
-* GPIO Pin: P1.0; P3.0 and P3.1
-* Peripheral: square-wave output and two mode input contacts
-* Power Supply: +5 V DC development-board supply.
-![Circuit Diagram](circuit.png)
+## Circuit Diagram
+![Circuit diagram](circuit.png)
 
-2. Core Logic / Pseudocode / Code Base
+## Working Principle
+Timer 0 generates periodic interrupts. In the main loop, the program checks P3.0 and P3.1 and selects a tick limit. The interrupt routine increments a counter on every timer interrupt. When the counter reaches the selected limit, P1.0 is toggled and the counter is reset.
 
-Working Principle:
-main() configures Timer 0 mode 1 and enables interrupts. The main loop selects limit 10, 2, or 50 from the P3 inputs. The ISR reloads TH0/TL0, counts ticks, and toggles P1.0 at the selected limit.
+The selected limit controls the time between output transitions. Since a complete square-wave period contains one high interval and one low interval, the output frequency depends on twice the toggle interval.
 
-Pseudocode:
-1. Set TMOD, TH0, and TL0 for Timer 0.
-2. Enable ET0 and EA and start TR0.
-3. Poll P3.0 then P3.1 to select limit.
-4. On each timer interrupt reload the timer and increase ticks.
-5. Toggle P1.0 and reset ticks when ticks reaches limit.
+## Implementation
+- Timer 0 is configured in Mode 1 and reloaded with `TH0 = 0xFC` and `TL0 = 0x66`.
+- `ET0`, `EA`, and `TR0` enable and start timer interrupts.
+- If P3.0 is low, `limit` is set to 10.
+- Otherwise, if P3.1 is low, `limit` is set to 2.
+- If neither input is low, `limit` is set to 50.
+- P3.0 is checked first, so it takes priority if both inputs are low.
+- The ISR toggles P1.0 whenever `ticks` reaches `limit`.
 
-Code Base:
+## Output and Observation
+A square-wave signal is generated on P1.0. Changing the input state changes the number of timer interrupts between successive transitions, thereby changing the waveform frequency. The source does not display or measure the frequency.
 
-Source files included and read in this task: `square_wave.c`.
-
-* reg51.h supplies the timer and P3_0/P3_1 names.
-* pulse is assigned to P1.0.
-* timer0() interrupt 1 reloads TH0=0xFC and TL0=0x66.
-* TMOD=0x01, ET0=1, EA=1, TR0=1 configure and start Timer 0 interrupts.
-* The main loop sets limit to 10, 2, or 50; P3.0 has priority over P3.1.
-* The ISR toggles pulse when ticks reaches limit.
-
-3. Inference
-
-P1.0 produces a repeating high/low signal. The two P3 input levels change the number of timer interrupts between toggles. This demonstrates timer interrupt output toggling; no frequency display or measurement is coded.
+## Inference
+This task demonstrates the use of a hardware timer interrupt to generate a digital waveform and the use of GPIO inputs to select its timing.
