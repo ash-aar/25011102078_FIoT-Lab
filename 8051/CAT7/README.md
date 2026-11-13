@@ -1,10 +1,20 @@
-# Continuous Lab Evaluation - CAT 7: 16x2 LCD Driver Development
+# CAT7 – 16×2 LCD Interfacing and Keypad-Based Display Control
 
-## 📂 Sub-Task Directory Index
-* **[`TASK7A_LCD_Init_Display/`](./TASK7A_LCD_Init_Display/)** - 4-bit initialization, command/data primitives, and dual-row string rendering[cite: 13].
-* **[`TASK7B_Cursor_Dynamic_Update/`](./TASK7B_Cursor_Dynamic_Update/)** - Cursor positioning (`lcd_goto`) and real-time numeric counter display[cite: 13].
-* **[`TASK7C_Keypad_Character_Movement/`](./TASK7C_Keypad_Character_Movement/)** - Interactive coordinate tracking using a 4x4 matrix keypad[cite: 13].
+CAT7 contains three exercises that build on a 4-bit interface to an HD44780-compatible 16×2 character LCD.
 
-## ⚙️ Hardware Specifications
-* **MCU:** AT89S52 (11.0592 MHz Crystal)[cite: 13]
-* **Peripherals:** HD44780-compatible 16x2 LCD (4-bit mode)[cite: 13, 14], 4x4 Matrix Keypad[cite: 13].
+| Task | Experiment | Source |
+|---|---|---|
+| [TASK7A](./TASK7A/README.md) | LCD initialization and static text display | `task7A_lcd.c` |
+| [TASK7B](./TASK7B/README.md) | LCD cursor positioning and dynamic counter display | `task7B_lcd.c` |
+| [TASK7C](./TASK7C/README.md) | Keypad-controlled character positioning (keypad scan routine is a placeholder in the current source) | `task7C_keypad_lcd.c` |
+
+## Common Hardware and Pin Configuration
+- **Microcontroller:** AT89S52 (8051 family)
+- **Clock:** 11.0592 MHz crystal
+- **LCD:** 16×2 character LCD, 4-bit data interface
+- **LCD RS:** P2.0
+- **LCD EN:** P2.1
+- **LCD data lines D4–D7:** P2.4–P2.7
+- **Keypad port in TASK7C:** P1
+
+The task pages describe the LCD routines and application logic implemented in each source file.
