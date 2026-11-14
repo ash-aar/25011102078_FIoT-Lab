@@ -1,0 +1,417 @@
+[
+  {
+    "id": "tab_env_intel",
+    "type": "tab",
+    "label": "Environmental Intelligence Telemetry",
+    "disabled": false,
+    "info": "BME280 I2C sensor via STM32 + ESP8266 MQTT telemetry combined with OpenWeatherMap API in Node-RED"
+  },
+  {
+    "id": "mqtt_broker_emqx",
+    "type": "mqtt-broker",
+    "name": "EMQX Public Broker",
+    "broker": "broker.emqx.io",
+    "port": "1883",
+    "clientid": "node-red-env-intel-25011102071",
+    "usetls": false,
+    "protocolVersion": "4",
+    "keepalive": "60",
+    "cleansession": true,
+    "autoConnect": true
+  },
+  {
+    "id": "ui_group_main",
+    "type": "ui_group",
+    "name": "Custom Dashboard",
+    "tab": "ui_tab_main",
+    "order": 1,
+    "disp": true,
+    "width": "18",
+    "collapse": false
+  },
+  {
+    "id": "ui_tab_main",
+    "type": "ui_tab",
+    "name": "Environmental Intelligence",
+    "icon": "dashboard",
+    "order": 1,
+    "disabled": false,
+    "hidden": false
+  },
+  {
+    "id": "node_mqtt_in",
+    "type": "mqtt in",
+    "z": "tab_env_intel",
+    "name": "Receive BME280 Data",
+    "topic": "snuc/iot/bme280/device01",
+    "qos": "0",
+    "datatype": "auto-detect",
+    "broker": "mqtt_broker_emqx",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 110,
+    "y": 440,
+    "wires": [
+      [
+        "node_process_sensor"
+      ]
+    ]
+  },
+  {
+    "id": "node_process_sensor",
+    "type": "function",
+    "z": "tab_env_intel",
+    "name": "PROCESS - BME280 Sensor Data",
+    "func": "var payload = msg.payload;\nif (typeof payload === 'string') {\n    try {\n        payload = JSON.parse(payload);\n    } catch(e) {\n        node.error('JSON parse error: ' + e.message);\n        return null;\n    }\n}\n\nflow.set('bme_temp', parseFloat(payload.temperature) || 0);\nflow.set('bme_hum', parseFloat(payload.humidity) || 0);\nflow.set('bme_press', parseFloat(payload.pressure) || 0);\nflow.set('bme_updated', new Date().toLocaleTimeString());\n\nmsg.payload = {\n    temperature: flow.get('bme_temp'),\n    humidity: flow.get('bme_hum'),\n    pressure: flow.get('bme_press'),\n    timestamp: flow.get('bme_updated')\n};\n\nreturn [msg, msg, msg, msg, msg];",
+    "outputs": 5,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 250,
+    "y": 380,
+    "wires": [
+      [
+        "node_build_dashboard"
+      ],
+      [
+        "node_debug_processed"
+      ],
+      [
+        "node_extract_temp"
+      ],
+      [
+        "node_extract_hum"
+      ],
+      [
+        "node_extract_press"
+      ]
+    ]
+  },
+  {
+    "id": "node_debug_processed",
+    "type": "debug",
+    "z": "tab_env_intel",
+    "name": "DEBUG - Processed Sensor Data",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 450,
+    "y": 240,
+    "wires": []
+  },
+  {
+    "id": "node_extract_temp",
+    "type": "function",
+    "z": "tab_env_intel",
+    "name": "EXTRACT - Temperature",
+    "func": "msg.payload = flow.get('bme_temp') || msg.payload.temperature;\nreturn msg;",
+    "outputs": 1,
+    "x": 430,
+    "y": 380,
+    "wires": [
+      [
+        "node_debug_temp",
+        "node_gauge_temp"
+      ]
+    ]
+  },
+  {
+    "id": "node_debug_temp",
+    "type": "debug",
+    "z": "tab_env_intel",
+    "name": "DEBUG - Temperature",
+    "active": true,
+    "tosidebar": true,
+    "x": 620,
+    "y": 300,
+    "wires": []
+  },
+  {
+    "id": "node_gauge_temp",
+    "type": "ui_gauge",
+    "z": "tab_env_intel",
+    "name": "GAUGE - Temperature",
+    "group": "ui_group_main",
+    "order": 1,
+    "width": 6,
+    "height": 4,
+    "gtype": "gage",
+    "title": "Ambient Temperature",
+    "label": "\u00b0C",
+    "format": "{{value | number:1}}",
+    "min": 0,
+    "max": "50",
+    "colors": [
+      "#00b500",
+      "#e6e600",
+      "#ca3838"
+    ],
+    "seg1": "28",
+    "seg2": "35",
+    "x": 830,
+    "y": 380,
+    "wires": []
+  },
+  {
+    "id": "node_extract_hum",
+    "type": "function",
+    "z": "tab_env_intel",
+    "name": "EXTRACT - Humidity",
+    "func": "msg.payload = flow.get('bme_hum') || msg.payload.humidity;\nreturn msg;",
+    "outputs": 1,
+    "x": 420,
+    "y": 490,
+    "wires": [
+      [
+        "node_debug_hum",
+        "node_gauge_hum"
+      ]
+    ]
+  },
+  {
+    "id": "node_debug_hum",
+    "type": "debug",
+    "z": "tab_env_intel",
+    "name": "DEBUG - Humidity",
+    "active": true,
+    "tosidebar": true,
+    "x": 610,
+    "y": 440,
+    "wires": []
+  },
+  {
+    "id": "node_gauge_hum",
+    "type": "ui_gauge",
+    "z": "tab_env_intel",
+    "name": "GAUGE - Humidity",
+    "group": "ui_group_main",
+    "order": 2,
+    "width": 6,
+    "height": 4,
+    "gtype": "gage",
+    "title": "Relative Humidity",
+    "label": "%",
+    "format": "{{value | number:1}}",
+    "min": 0,
+    "max": "100",
+    "colors": [
+      "#2196f3",
+      "#00e676",
+      "#ff9800"
+    ],
+    "seg1": "40",
+    "seg2": "70",
+    "x": 820,
+    "y": 490,
+    "wires": []
+  },
+  {
+    "id": "node_extract_press",
+    "type": "function",
+    "z": "tab_env_intel",
+    "name": "EXTRACT - Pressure",
+    "func": "msg.payload = flow.get('bme_press') || msg.payload.pressure;\nreturn msg;",
+    "outputs": 1,
+    "x": 420,
+    "y": 610,
+    "wires": [
+      [
+        "node_debug_press",
+        "node_gauge_press"
+      ]
+    ]
+  },
+  {
+    "id": "node_debug_press",
+    "type": "debug",
+    "z": "tab_env_intel",
+    "name": "DEBUG - Pressure",
+    "active": true,
+    "tosidebar": true,
+    "x": 610,
+    "y": 660,
+    "wires": []
+  },
+  {
+    "id": "node_gauge_press",
+    "type": "ui_gauge",
+    "z": "tab_env_intel",
+    "name": "GAUGE - Pressure",
+    "group": "ui_group_main",
+    "order": 3,
+    "width": 6,
+    "height": 4,
+    "gtype": "gage",
+    "title": "Atmospheric Pressure",
+    "label": "hPa",
+    "format": "{{value | number:1}}",
+    "min": "950",
+    "max": "1050",
+    "colors": [
+      "#00bcd4",
+      "#4caf50",
+      "#ff5722"
+    ],
+    "seg1": "1000",
+    "seg2": "1025",
+    "x": 820,
+    "y": 610,
+    "wires": []
+  },
+  {
+    "id": "node_fetch_weather",
+    "type": "inject",
+    "z": "tab_env_intel",
+    "name": "Fetch Weather Every 15m",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
+    "repeat": "900",
+    "crontab": "",
+    "once": true,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "x": 200,
+    "y": 810,
+    "wires": [
+      [
+        "node_req_openweather"
+      ]
+    ]
+  },
+  {
+    "id": "node_req_openweather",
+    "type": "function",
+    "z": "tab_env_intel",
+    "name": "OpenWeather Request",
+    "func": "msg.url = 'https://api.openweathermap.org/data/2.5/weather?q=Chennai,IN&units=metric&appid=b1b15e88fa797225412429c1c50c122a1';\nmsg.method = 'GET';\nreturn msg;",
+    "outputs": 1,
+    "x": 320,
+    "y": 810,
+    "wires": [
+      [
+        "node_http_weather"
+      ]
+    ]
+  },
+  {
+    "id": "node_http_weather",
+    "type": "http request",
+    "z": "tab_env_intel",
+    "name": "Get Current Weather",
+    "method": "use",
+    "ret": "obj",
+    "paytoqs": "ignore",
+    "url": "",
+    "tls": "",
+    "persist": false,
+    "proxy": "",
+    "authType": "",
+    "senderr": false,
+    "headers": [],
+    "x": 420,
+    "y": 810,
+    "wires": [
+      [
+        "node_weather_response"
+      ]
+    ]
+  },
+  {
+    "id": "node_weather_response",
+    "type": "function",
+    "z": "tab_env_intel",
+    "name": "Weather API Response",
+    "func": "var res = msg.payload;\nif (res && res.main) {\n    flow.set('weather_temp', parseFloat(res.main.temp) || 0);\n    flow.set('weather_hum', parseFloat(res.main.humidity) || 0);\n    flow.set('weather_city', res.name || 'Chennai');\n    flow.set('weather_desc', res.weather && res.weather[0] ? res.weather[0].description : 'Clear');\n    flow.set('weather_updated', new Date().toLocaleTimeString());\n}\n\nmsg.payload = {\n    city: flow.get('weather_city'),\n    temp: flow.get('weather_temp'),\n    humidity: flow.get('weather_hum'),\n    description: flow.get('weather_desc'),\n    updated: flow.get('weather_updated')\n};\n\nreturn [msg, msg];",
+    "outputs": 2,
+    "x": 530,
+    "y": 810,
+    "wires": [
+      [
+        "node_refresh_dashboard"
+      ],
+      [
+        "node_debug_weather"
+      ]
+    ]
+  },
+  {
+    "id": "node_debug_weather",
+    "type": "debug",
+    "z": "tab_env_intel",
+    "name": "OpenWeather Output",
+    "active": true,
+    "tosidebar": true,
+    "x": 770,
+    "y": 810,
+    "wires": []
+  },
+  {
+    "id": "node_refresh_dashboard",
+    "type": "function",
+    "z": "tab_env_intel",
+    "name": "REFRESH - Dashboard After Weather",
+    "func": "return msg;",
+    "outputs": 1,
+    "x": 590,
+    "y": 720,
+    "wires": [
+      [
+        "node_build_dashboard"
+      ]
+    ]
+  },
+  {
+    "id": "node_build_dashboard",
+    "type": "function",
+    "z": "tab_env_intel",
+    "name": "BUILD - Dashboard Data",
+    "func": "var bmeTemp = flow.get('bme_temp');\nvar bmeHum = flow.get('bme_hum');\nvar bmePress = flow.get('bme_press');\nvar bmeUpdated = flow.get('bme_updated') || 'Waiting for data';\n\nvar weatherTemp = flow.get('weather_temp');\nvar weatherHum = flow.get('weather_hum');\nvar weatherDesc = flow.get('weather_desc') || 'Waiting for data';\nvar weatherUpdated = flow.get('weather_updated') || 'Waiting for data';\n\nvar tempDiff = '--';\nvar comparisonStatus = 'Waiting for data';\nvar advisory = 'Waiting for data';\n\nif (bmeTemp !== undefined && weatherTemp !== undefined) {\n    var diff = (bmeTemp - weatherTemp).toFixed(1);\n    tempDiff = (diff > 0 ? '+' : '') + diff + ' \u00b0C';\n    \n    if (bmeTemp > weatherTemp + 2) {\n        comparisonStatus = 'Indoor significantly warmer than outdoor';\n        advisory = 'Indoor heat trap detected. Enable cross-ventilation or air conditioning to prevent discomfort.';\n    } else if (bmeTemp < weatherTemp - 2) {\n        comparisonStatus = 'Indoor cooler than outdoor ambient';\n        advisory = 'Indoor climate retention optimal. Keep windows closed during peak noon hours.';\n    } else {\n        comparisonStatus = 'Thermal equilibrium reached';\n        advisory = 'Classroom thermal conditions align comfortably with ambient micro-climate.';\n    }\n}\n\nmsg.payload = {\n    sensorStatus: bmeTemp !== undefined ? 'ONLINE' : 'Waiting for data',\n    weatherStatus: weatherTemp !== undefined ? 'CONNECTED' : 'Waiting for data',\n    sensorUpdated: bmeUpdated,\n    weatherUpdated: weatherUpdated,\n    bmeTemp: bmeTemp !== undefined ? bmeTemp.toFixed(1) : '--',\n    bmeHum: bmeHum !== undefined ? bmeHum.toFixed(1) : '--',\n    bmePress: bmePress !== undefined ? bmePress.toFixed(1) : '--',\n    weatherTemp: weatherTemp !== undefined ? weatherTemp.toFixed(1) : '--',\n    weatherHum: weatherHum !== undefined ? weatherHum.toFixed(1) : '--',\n    tempDiff: tempDiff,\n    comparisonStatus: comparisonStatus,\n    advisory: advisory\n};\n\nreturn msg;",
+    "outputs": 1,
+    "x": 690,
+    "y": 70,
+    "wires": [
+      [
+        "node_ui_dashboard"
+      ]
+    ]
+  },
+  {
+    "id": "node_ui_dashboard",
+    "type": "ui_template",
+    "z": "tab_env_intel",
+    "name": "UI - Environmental Intelligence",
+    "group": "ui_group_main",
+    "order": 4,
+    "width": "18",
+    "height": "12",
+    "format": "<style>\n  .ei-container { background: #0b111e; color: #e2e8f0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; padding: 24px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }\n  .ei-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; padding-bottom: 16px; margin-bottom: 24px; }\n  .ei-title { font-size: 24px; font-weight: 700; color: #f8fafc; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }\n  .badge { background: #0369a1; color: #38bdf8; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.5px; }\n  .ei-meta { display: flex; gap: 20px; font-size: 12px; color: #94a3b8; }\n  .status-pill { background: #1e293b; padding: 4px 12px; border-radius: 8px; border: 1px solid #334155; }\n  .status-pill b { color: #38bdf8; }\n  .ei-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px; }\n  .ei-card { background: #131d2e; border: 1px solid #1e293b; border-radius: 12px; padding: 18px; transition: transform 0.2s ease, border-color 0.2s ease; }\n  .ei-card:hover { border-color: #38bdf8; }\n  .card-label { font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 4px; }\n  .card-sub { font-size: 14px; font-weight: 600; color: #94a3b8; margin-bottom: 12px; }\n  .card-value { font-size: 32px; font-weight: 700; color: #f8fafc; display: flex; align-items: baseline; gap: 6px; }\n  .card-unit { font-size: 16px; color: #64748b; font-weight: 500; }\n  .status-tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 6px; background: #1e293b; color: #38bdf8; float: right; }\n  .progress-track { background: #1e293b; height: 6px; border-radius: 3px; margin-top: 14px; overflow: hidden; }\n  .progress-fill { background: linear-gradient(90deg, #0284c7, #38bdf8); height: 100%; border-radius: 3px; }\n  .ei-footer-grid { display: grid; grid-template-columns: 1fr 1fr 1.2fr; gap: 16px; }\n  .advisory-box { background: #101c30; border-left: 4px solid #38bdf8; border-radius: 12px; padding: 18px; }\n  .advisory-title { font-size: 14px; font-weight: 700; color: #38bdf8; text-transform: uppercase; margin-bottom: 8px; }\n  .advisory-text { font-size: 13px; line-height: 1.6; color: #cbd5e1; }\n</style>\n\n<div class=\"ei-container\">\n  <div class=\"ei-header\">\n    <div>\n      <div class=\"ei-title\">\n        <span>Environmental Intelligence</span>\n        <span class=\"badge\">LIVE TELEMETRY</span>\n      </div>\n      <div style=\"font-size: 13px; color: #64748b; margin-top: 4px;\">Classroom IoT Monitoring &bull; Shiv Nadar University Chennai</div>\n    </div>\n    <div class=\"ei-meta\">\n      <div class=\"status-pill\">SENSOR: <b>{{msg.payload.sensorStatus}}</b></div>\n      <div class=\"status-pill\">WEATHER API: <b>{{msg.payload.weatherStatus}}</b></div>\n      <div class=\"status-pill\">UPDATED: <b>{{msg.payload.sensorUpdated}}</b></div>\n    </div>\n  </div>\n\n  <div class=\"ei-grid\">\n    <div class=\"ei-card\">\n      <span class=\"status-tag\">{{msg.payload.sensorStatus}}</span>\n      <div class=\"card-label\">AMBIENT THERMAL</div>\n      <div class=\"card-sub\">Temperature</div>\n      <div class=\"card-value\">{{msg.payload.bmeTemp}}<span class=\"card-unit\">&deg;C</span></div>\n      <div class=\"progress-track\"><div class=\"progress-fill\" style=\"width: 60%;\"></div></div>\n      <div style=\"display:flex; justify-content:space-between; font-size:10px; color:#64748b; margin-top:4px;\"><span>0&deg;C</span><span>CLASSROOM SENSOR</span><span>50&deg;C</span></div>\n    </div>\n\n    <div class=\"ei-card\">\n      <span class=\"status-tag\">{{msg.payload.sensorStatus}}</span>\n      <div class=\"card-label\">MOISTURE CONTENT</div>\n      <div class=\"card-sub\">Humidity</div>\n      <div class=\"card-value\">{{msg.payload.bmeHum}}<span class=\"card-unit\">%</span></div>\n      <div class=\"progress-track\"><div class=\"progress-fill\" style=\"width: 55%; background: linear-gradient(90deg, #059669, #34d399);\"></div></div>\n      <div style=\"display:flex; justify-content:space-between; font-size:10px; color:#64748b; margin-top:4px;\"><span>0%</span><span>RELATIVE HUMIDITY</span><span>100%</span></div>\n    </div>\n\n    <div class=\"ei-card\">\n      <span class=\"status-tag\">{{msg.payload.sensorStatus}}</span>\n      <div class=\"card-label\">BAROMETRIC STATUS</div>\n      <div class=\"card-sub\">Atmospheric Pressure</div>\n      <div class=\"card-value\">{{msg.payload.bmePress}}<span class=\"card-unit\">hPa</span></div>\n      <div class=\"progress-track\"><div class=\"progress-fill\" style=\"width: 70%; background: linear-gradient(90deg, #7c3aed, #a78bfa);\"></div></div>\n      <div style=\"display:flex; justify-content:space-between; font-size:10px; color:#64748b; margin-top:4px;\"><span>950 hPa</span><span>BAROMETRIC PRESSURE</span><span>1050 hPa</span></div>\n    </div>\n  </div>\n\n  <div class=\"ei-footer-grid\">\n    <div class=\"ei-card\">\n      <div class=\"card-label\">EXTERNAL WEATHER</div>\n      <div class=\"card-sub\">OpenWeather Feed</div>\n      <div class=\"card-value\">{{msg.payload.weatherTemp}}<span class=\"card-unit\">&deg;C</span></div>\n      <div style=\"font-size:12px; color:#94a3b8; margin-top:8px;\">Outdoor Humidity: <b>{{msg.payload.weatherHum}}%</b></div>\n      <div style=\"font-size:11px; color:#64748b; margin-top:4px;\">Updated: {{msg.payload.weatherUpdated}}</div>\n    </div>\n\n    <div class=\"ei-card\">\n      <div class=\"card-label\">THERMAL GRADIENT ANALYSIS</div>\n      <div class=\"card-sub\">Classroom vs. Outdoor</div>\n      <div style=\"font-size:13px; color:#94a3b8; margin-bottom:6px;\">&bull; Classroom Indoor: <b style=\"color:#38bdf8;\">{{msg.payload.bmeTemp}} &deg;C</b></div>\n      <div style=\"font-size:13px; color:#94a3b8; margin-bottom:10px;\">&bull; Outdoor Weather: <b style=\"color:#f59e0b;\">{{msg.payload.weatherTemp}} &deg;C</b></div>\n      <div style=\"font-size:12px; color:#cbd5e1;\">Temp Difference: <b>{{msg.payload.tempDiff}}</b></div>\n      <div style=\"font-size:11px; color:#38bdf8; margin-top:4px;\">{{msg.payload.comparisonStatus}}</div>\n    </div>\n\n    <div class=\"advisory-box\">\n      <div class=\"advisory-title\">+ ENVIRONMENTAL ADVISORY &amp; COMFORT GUIDANCE</div>\n      <div class=\"advisory-text\">{{msg.payload.advisory}}</div>\n      <div style=\"margin-top:14px; font-size:11px; color:#64748b; display:flex; justify-content:space-between;\">\n        <span>SENSOR LINK: <b style=\"color:#38bdf8;\">{{msg.payload.sensorStatus}}</b></span>\n        <span>WEATHER FEED: <b style=\"color:#38bdf8;\">{{msg.payload.weatherStatus}}</b></span>\n      </div>\n    </div>\n  </div>\n</div>",
+    "storeOutMessages": true,
+    "fwdInMessages": true,
+    "resendOnRefresh": true,
+    "templateScope": "local",
+    "className": "",
+    "x": 850,
+    "y": 170,
+    "wires": [
+      []
+    ]
+  }
+]

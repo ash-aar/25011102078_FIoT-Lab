@@ -6,8 +6,6 @@ It documents practical implementations involving microcontrollers, embedded syst
 
 ## Repository Overview
 
-The repository is organized into two main sections:
-
 | Section | Description |
 |---|---|
 | [8051](./8051/) | Laboratory experiments involving the 8051 microcontroller |
@@ -46,7 +44,8 @@ IoT_GITHUB_REPO/
 │   ├── CAT11/
 │   ├── CAT12/
 │   ├── CAT13/
-│   └── CAT14/
+│   ├── CAT14/
+│   └── CAT15/
 │
 ├── .gitignore
 ├── LICENSE
@@ -68,6 +67,7 @@ The STM32 section contains experiments organized by category.
 | CAT12 | NUCLEO-F401RE GPIO and button interfacing | TASK12A–TASK12C |
 | CAT13 | BME280 sensor interfacing using I2C | TASK13 |
 | CAT14 | BME280 sensor data communication using MQTT | TASK14 |
+| CAT15 | Additional STM32 laboratory project | Refer to the CAT15 folder |
 
 For detailed objectives, working principles, implementation details, circuit diagrams and observations, refer to the individual task documentation.
 
