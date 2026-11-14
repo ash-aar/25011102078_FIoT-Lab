@@ -1,40 +1,45 @@
-\# Task 7C: 4x4 Keypad-Based Character Movement
+# TASK7C – Keypad Interfacing with LCD
 
+## 1. Experiment Details
 
+**Experiment:** Keypad interfacing with an LCD using the 8051 microcontroller  
+**Program file:** `task7C_keypad_lcd.c`
 
-\## 📋 Objective
+## 2. Objective
 
-To build an interactive embedded application integrating a 4×4 matrix keypad with the 4-bit LCD driver, allowing users to move a character dynamically across the 16×2 display using directional keys\[cite: 13].
+To develop an 8051-based program for interfacing a keypad with an LCD and displaying character information based on keypad input.
 
+## 3. Circuit Diagram
 
+Refer to the `circuit.png` file in this directory for the circuit diagram.
 
-\## 🛠️ Hardware \& Pin Configuration
+## 4. Working Principle
 
-\* \*\*Microcontroller:\*\* AT89S52 (11.0592 MHz Crystal)\[cite: 13]
+The experiment is intended to combine keypad input and LCD output.
 
-\* \*\*Display:\*\* 16×2 Character LCD (HD44780 Driver, 4-bit mode)\[cite: 13, 14]
+The keypad scanning routine is responsible for detecting a key press. The detected key can then be processed by the main program and displayed on the LCD.
 
-\* \*\*Input Device:\*\* 4×4 Matrix Keypad connected to Port 1 (`P1.0 - P1.7`)\[cite: 13]
+The LCD is initialized before the main program enters its input-processing loop.
 
+**Implementation status:** The current `scan_keypad()` function is a placeholder that always returns `0`. Therefore, actual keypad detection is not implemented, and the keypad-based character movement functionality does not operate as intended.
 
+## 5. Implementation / Important Code Logic
 
-\## 🚀 Implementation Details
+The implementation contains the following components:
 
-\* Scans row and column lines to capture matrix key presses.
+1. LCD initialization and command functions.
+2. LCD character display functionality.
+3. A keypad scanning function named `scan_keypad()`.
+4. Main-loop logic intended to process keypad input and update the LCD display.
 
-\* Maps navigation keys to coordinate shifts:
+The current keypad scanning function returns `0` without detecting any physical key presses. As a result, the main program does not receive actual keypad input.
 
-&#x20; \* \*\*Key `2`:\*\* Move Up ($row = 1$)\[cite: 13]
+## 6. Output and Observations
 
-&#x20; \* \*\*Key `8`:\*\* Move Down ($row = 2$)\[cite: 13]
+The LCD initialization and display-related functions are present in the program.
 
-&#x20; \* \*\*Key `4`:\*\* Move Left ($col--$)\[cite: 13]
+However, keypad input detection is incomplete because `scan_keypad()` is currently a placeholder. The intended keypad-based character movement cannot be verified from the current implementation.
 
-&#x20; \* \*\*Key `6`:\*\* Move Right ($col++$)\[cite: 13]
+## 7. Inference
 
-
-
-\## 📷 Circuit Schematic
-
-!\[Circuit Diagram](circuit.png)
-
+The experiment demonstrates the intended structure of keypad and LCD interfacing using the 8051 microcontroller. The LCD-related implementation is present, but the keypad scanning routine requires further development before the complete experiment can function as intended.

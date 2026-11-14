@@ -1,0 +1,31 @@
+# Keil build artifacts
+Objects/
+Listings/
+*.hex
+*.axf
+*.elf
+*.bin
+*.map
+*.lst
+*.o
+*.d
+
+# STM32CubeIDE build output
+Debug/
+Release/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.tmp
+
+# Python cache and environments
+__pycache__/
+*.py[cod]
+venv/
+.env
+
+# Windows files
+Thumbs.db
+Desktop.ini

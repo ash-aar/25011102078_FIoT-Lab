@@ -1,34 +1,43 @@
-\# Task 6A: External Interrupt-Based Control
+# TASK6A – UART Character Transmission Using 8051
 
+## 1. Experiment Details
 
+**Experiment:** UART serial communication using the 8051 microcontroller  
+**Program file:** `task_A.c`
 
-\## 📋 Objective
+## 2. Objective
 
-To develop an Embedded C application for the AT89S52 microcontroller utilizing external hardware interrupts (`EX0` / `EX1`) to handle asynchronous events and execute real-time ISR-driven responses.
+To configure the UART peripheral of the 8051 microcontroller and transmit a character string to a connected serial device.
 
+## 3. Circuit Diagram
 
+Refer to the `circuit.png` file in this directory for the circuit diagram.
 
-\## 🛠️ Hardware \& Pin Configuration
+## 4. Working Principle
 
-\* \*\*Microcontroller:\*\* AT89S52 (11.0592 MHz Crystal)\[cite: 13]
+The 8051 microcontroller uses its built-in UART peripheral to transmit serial data.
 
-\* \*\*Interrupt Pins:\*\* `INT0` (Pin P3.2) and `INT1` (Pin P3.3) connected to push buttons.
+The program initializes the UART communication settings and sends the message:
 
-\* \*\*Output Peripherals:\*\* Status LEDs connected to Port 1 (`P1.0 - P1.7`).
+`Hello from 8051`
 
+The data is transmitted serially through the UART transmit pin and can be received by a connected serial terminal or compatible device.
 
+## 5. Implementation / Important Code Logic
 
-\## 🚀 Implementation Details
+The implementation in `task_A.c` performs the following operations:
 
-\* Configures interrupt control registers (`IE` and `TCON`) for edge or level-triggered interrupts.
+1. Initializes the UART peripheral.
+2. Configures the serial communication settings.
+3. Transmits the string `Hello from 8051`.
+4. Uses the UART transmit mechanism to send the message character by character.
 
-\* Implements a clean Interrupt Service Routine (ISR) to toggle peripheral states upon external button presses.
+## 6. Output and Observations
 
-\* Minimizes latency inside the ISR to maintain predictable system behavior.
+The message `Hello from 8051` is transmitted through the UART interface.
 
+The transmitted message can be observed using a compatible serial terminal when the hardware is connected and the terminal settings match the program configuration.
 
+## 7. Inference
 
-\## 📷 Circuit Schematic
-
-!\[Circuit Diagram](circuit.png)
-
+The experiment demonstrates basic UART initialization and serial data transmission using the 8051 microcontroller.
