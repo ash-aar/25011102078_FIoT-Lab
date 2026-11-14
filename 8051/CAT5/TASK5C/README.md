@@ -1,43 +1,31 @@
-EXPERIMENT DETAILS
-EXP: Continuous Lab Evaluation-5
-DATE: 10/08/2026
-NAME OF EXP: Hardware Timer and Interrupt-Based Timing for LED Fading, Pulse Generation, and Stepper Motor Control
-HARDWARE SETUP / PLATFORM: AT89S52 8051 development board + Keil C51
-TASK 3 : Stepper-motor speed and direction control. (*)
+# CAT5 – TASK5C: Stepper-Motor Phase Sequencing
 
-1. Circuit Diagram
+## Experiment Details
+- **Microcontroller:** AT89S52
+- **Clock:** 11.0592 MHz crystal
+- **Timer:** Timer 0, Mode 1
+- **Output port:** Port 1
+- **Phase sequence:** 0x08, 0x04, 0x02, 0x01
+- **Source file:** `stepper.c`
 
-The P1 low nibble is written with four one-bit phase values from the sequence array.
+## Objective
+Generate a repeating sequence of digital output patterns on Port 1 to drive the phases of a stepper-motor interface at a timer-controlled rate.
 
-* Microcontroller: AT89S52 (8051)
-* GPIO Port: Port 1; Timer 0 is also used
-* GPIO Pin: P1.0–P1.3
-* Peripheral: four phase-input lines to a stepper interface; the source does not specify a driver IC
-* Power Supply: +5 V DC development-board supply.
-![Circuit Diagram](circuit.png)
+## Circuit Diagram
+![Circuit diagram](circuit.png)
 
-2. Core Logic / Pseudocode / Code Base
+## Working Principle
+Timer 0 periodically invokes an interrupt service routine. The ISR increments a tick counter and, when the counter reaches 50, resets it and writes the next value from the phase sequence to Port 1. The sequence index advances modulo four, so the four output patterns repeat continuously.
 
-Working Principle:
-main() starts Timer 0 mode 1 with its interrupt enabled. The ISR reloads TH0/TL0; after 50 counts it writes seq[step] to P1 and advances step modulo four.
+## Implementation
+- Timer 0 is configured in Mode 1 and reloaded with `TH0 = 0xFC` and `TL0 = 0x66`.
+- `ET0`, `EA`, and `TR0` enable and start the timer interrupt.
+- The `seq[]` array stores the four output patterns: `0x08`, `0x04`, `0x02`, and `0x01`.
+- After every 50 timer interrupts, the ISR writes the next pattern to P1 and advances `step` using modulo-four indexing.
+- The source continuously repeats this sequence. It does not contain a separate direction-control input.
 
-Pseudocode:
-1. Configure and start Timer 0 with interrupts enabled.
-2. On timer interrupt reload TH0/TL0 and increment ticks.
-3. When ticks reaches 50, clear ticks.
-4. Write the next seq value to P1 and advance step modulo four.
-5. Leave the main loop running.
+## Output and Observation
+The four output patterns are applied to Port 1 in sequence, one phase line at a time. The interval between updates is controlled by the Timer 0 interrupt counter.
 
-Code Base:
-
-Source files included and read in this task: `stepper.c`.
-
-* reg51.h provides the 8051 timer and port declarations.
-* seq contains 0x08, 0x04, 0x02, 0x01, selecting P1.3 through P1.0 in order.
-* timer0() interrupt 1 reloads TH0=0xFC and TL0=0x66 and updates ticks.
-* TMOD=0x01, ET0=1, EA=1, TR0=1 configure and start Timer 0 interrupts.
-* The source does not define a direction input or a motor-driver IC.
-
-3. Inference
-
-P1.3, P1.2, P1.1, and P1.0 are asserted in sequence, one at a time. The code demonstrates periodic port updates from a timer interrupt; it does not implement a direction control input.
+## Inference
+This task demonstrates periodic output sequencing using a timer interrupt. The generated phase sequence can be used with a suitable stepper-motor driver interface.

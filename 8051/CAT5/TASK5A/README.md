@@ -1,44 +1,32 @@
-EXPERIMENT DETAILS
-EXP: Continuous Lab Evaluation-5
-DATE: 10/08/2026
-NAME OF EXP: Hardware Timer and Interrupt-Based Timing for LED Fading, Pulse Generation, and Stepper Motor Control
-HARDWARE SETUP / PLATFORM: AT89S52 8051 development board + Keil C51
-TASK 1 : LED fading using software PWM
+# CAT5 – TASK5A: LED Fading Using Software PWM
 
-1. Circuit Diagram
+## Experiment Details
+- **Microcontroller:** AT89S52
+- **Clock:** 11.0592 MHz crystal
+- **Timer:** Timer 0, Mode 1
+- **Output:** LED control on P1.0
+- **Source file:** `fade.c`
 
-fade.c updates P1.0 from a Timer 0 ISR.
+## Objective
+Vary the average power delivered to an LED by generating a pulse-width-modulated digital output under Timer 0 interrupt control.
 
-* Microcontroller: AT89S52 (8051)
-* GPIO Port: Port 1; Timer 0 is also used
-* GPIO Pin: P1.0
-* Peripheral: LED(s) with series resistors
-* Power Supply: +5 V DC development-board supply.
-![Circuit Diagram](circuit.png)
+## Circuit Diagram
+![Circuit diagram](circuit.png)
 
-2. Core Logic / Pseudocode / Code Base
+## Working Principle
+The Timer 0 interrupt periodically updates a software counter. The program divides the timing sequence into a repeating set of ten ticks and compares the current tick with a duty-related value. This determines whether P1.0 is driven high or low during each part of the cycle.
 
-Working Principle:
-fade.c sets Timer 0 mode 1 and enables its ISR. The ISR reloads TH0/TL0, updates tick/ms/duty, and assigns a Boolean comparison to P1.0.
+A separate counter updates the duty variable at a slower rate. The variable increases until it reaches its upper limit, then decreases until it reaches zero. This repeated increase and decrease changes the output duty cycle and creates the fading effect.
 
-Pseudocode:
-1. Configure Timer 0, enable ET0 and EA, and start it.
-2. On each interrupt reload the timer and update tick.
-3. Advance or decrease duty after the ms count threshold.
-4. Set P1.0 from the tick-versus-duty comparison.
+## Implementation
+- Timer 0 is configured in Mode 1 using `TMOD = 0x01`.
+- The timer is reloaded with `TH0 = 0xFC` and `TL0 = 0x66` inside the ISR.
+- `ET0` and `EA` enable the Timer 0 interrupt and global interrupts; `TR0` starts the timer.
+- The `tick`, `ms`, `duty`, and `up` variables control the PWM timing and the direction in which the duty value changes.
+- The main function remains in an infinite loop while the interrupt routine handles the output.
 
+## Output and Observation
+The program continuously changes the duty-related threshold, producing a PWM-style output on P1.0 whose average level rises and falls over time. With an LED connected to this output, the intended result is a gradual increase and decrease in apparent brightness.
 
-Code Base:
-
-Source file included and read in this task: `fade.c`.
-
-* fade.c includes reg51.h for the 8051 port and timer declarations.
-* led maps to P1.0; timer0() is interrupt 1 and reloads TH0=0xFC, TL0=0x66.
-* TMOD=0x01, ET0=1, EA=1, and TR0=1 configure and start Timer 0 interrupts.
-* tick, ms, duty, and up control the P1.0 assignment.
-
-
-
-3. Inference
-
-fade.c switches P1.0 according to its tick and duty counters. The output demonstrates Timer 0 interrupt timing and software PWM-style LED control.
+## Inference
+This task demonstrates timer interrupt programming, software generation of PWM-style signals, and control of LED brightness by varying the duty cycle.

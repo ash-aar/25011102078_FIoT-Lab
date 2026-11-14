@@ -1,9 +1,17 @@
-# Continuous Lab Evaluation - CAT 6: Interrupts & ADC/DAC Interfacing
+# CAT6 – Serial Communication Using the 8051 UART
 
-## 📂 Sub-Task Directory Index
-* **[`TASK6A/`](./TASK6A/)** - External hardware interrupt configuration and ISR handling[cite: 19].
-* **[`TASK6B/`](./TASK6B/)** - Analog signal conversion using ADC and DAC peripherals[cite: 19].
+CAT6 contains two exercises covering UART initialization, serial transmission, and polling-based reception on the AT89S52.
 
-## ⚙️ Hardware Specifications
-* **MCU:** AT89S52 (11.0592 MHz Crystal)[cite: 13]
-* **Peripherals:** Push-button triggers, status LEDs, ADC/DAC conversion modules.
+| Task | Experiment | Source |
+|---|---|---|
+| [TASK6A](./TASK6A/README.md) | UART initialization and periodic string transmission | `task_A.c` |
+| [TASK6B](./TASK6B/README.md) | UART character reception and echo | `task_B.c` |
+
+## Common Setup
+- **Microcontroller:** AT89S52 (8051 family)
+- **Clock:** 11.0592 MHz crystal
+- **Serial interface:** On-chip UART, Mode 1 (8-bit UART)
+- **Baud rate:** 9600 baud
+- **Timer:** Timer 1, Mode 2 (8-bit auto-reload)
+
+Both programs configure the UART using Timer 1 and communicate through the 8051 serial buffer register (SBUF). See each task page for its specific transmit or receive logic.
